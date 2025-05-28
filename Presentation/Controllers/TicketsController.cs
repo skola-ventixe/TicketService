@@ -12,7 +12,18 @@ namespace Presentation.Controllers
         private readonly ITicketService _ticketService = ticketService;
 
         [HttpGet]
-        public async Task<IActionResult> GetAllTicketsForPackage([FromQuery] string packageId)
+        public async Task<IActionResult> GetAllTicketsAsync()
+        {
+            var response = await _ticketService.GetAllTicketsAsync();
+            if (!response.Success)
+            {
+                return NotFound(response.Message);
+            }
+            return Ok(response.Data);
+        }
+
+        [HttpGet("forpackage/{packageId}")]
+        public async Task<IActionResult> GetAllTicketsForPackage(string packageId)
         {
             if (string.IsNullOrEmpty(packageId))
             {

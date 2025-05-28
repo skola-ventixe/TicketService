@@ -1,3 +1,4 @@
+using Azure.Messaging.ServiceBus;
 using Microsoft.EntityFrameworkCore;
 using Presentation.Data;
 using Presentation.Services;
@@ -19,6 +20,13 @@ builder.Services.AddDbContext<TicketDataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<ITicketService, TicketService>();
+
+var serviceBusConnection = builder.Configuration["ServiceBusConnection"];
+builder.Services.AddSingleton(x => new ServiceBusClient(serviceBusConnection));
+builder.Services.AddSingleton(x =>
+    x.GetRequiredService<ServiceBusClient>().CreateSender("event-bus"));
+builder.Services.AddSingleton<TicketBusListener>();
+builder.Services.AddHostedService<TicketBusListener>();
 
 
 

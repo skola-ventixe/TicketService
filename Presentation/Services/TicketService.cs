@@ -15,6 +15,26 @@ public class TicketService : ITicketService
         _tickets = _context.Set<Ticket>();
     }
 
+    public async Task<ServiceResponse<IEnumerable<Ticket>>> GetAllTicketsAsync()
+    {
+        var allTickets = await _tickets.ToListAsync();
+        if (allTickets == null)
+        {
+            return new ServiceResponse<IEnumerable<Ticket>>
+            {
+                Success = false,
+                Message = "No tickets could be found.",
+                Data = []
+            };
+        }
+
+        return new ServiceResponse<IEnumerable<Ticket>>
+        {
+            Success = true,
+            Data = allTickets
+        };
+    }
+
     public async Task<ServiceResponse<Ticket?>> GetTicketAsync(string id)
     {
         if (string.IsNullOrEmpty(id))
@@ -64,7 +84,7 @@ public class TicketService : ITicketService
             var tickets = await _tickets
                 .Where(t => t.PackageId == packageId)
                 .ToListAsync();
-            if (tickets == null || !tickets.Any())
+            if (tickets == null || tickets.Count == 0)
             {
                 return new ServiceResponse<List<Ticket>>
                 {
