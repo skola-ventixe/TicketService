@@ -155,6 +155,7 @@ public class TicketService : ITicketService
                 var entity = new Ticket
                 {
                     PackageId = tickets.PackageId,
+                    EventId = tickets.EventId,
                     UserId = tickets.UserId,
                     Name = name
                 };
