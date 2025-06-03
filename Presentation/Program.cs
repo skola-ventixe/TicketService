@@ -21,15 +21,6 @@ builder.Services.AddDbContext<TicketDataContext>(options =>
 
 builder.Services.AddScoped<ITicketService, TicketService>();
 
-var serviceBusConnection = builder.Configuration["ServiceBusConnection"];
-builder.Services.AddSingleton(x => new ServiceBusClient(serviceBusConnection));
-builder.Services.AddSingleton(x =>
-    x.GetRequiredService<ServiceBusClient>().CreateSender("event-bus"));
-builder.Services.AddSingleton<TicketBusListener>();
-builder.Services.AddHostedService<TicketBusListener>();
-
-
-
 var app = builder.Build();
 app.MapOpenApi();
 app.UseHttpsRedirection();

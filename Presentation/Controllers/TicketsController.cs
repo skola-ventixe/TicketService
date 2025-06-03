@@ -53,20 +53,34 @@ namespace Presentation.Controllers
             return Ok(response.Data);
         }
 
+        [HttpGet("sold/{eventId}")]
+        public async Task<IActionResult> GetSoldTicketsForEvent(string eventId)
+        {
+            if (string.IsNullOrEmpty(eventId))
+            {
+                return BadRequest("Event ID cannot be null or empty.");
+            }
+            var response = await _ticketService.GetTicketsSoldAsync(eventId);
+            if (!response.Success)
+            {
+                return NotFound(response.Message);
+            }
+            return Ok(response.Data);
+        }
 
         [HttpPost]
-        public async Task<IActionResult> CreateTicket([FromBody] TicketRegistrationDto ticket)
+        public async Task<IActionResult> CreateTickets([FromBody] TicketRegistrationDto tickets)
         {
-            if (ticket == null)
+            if (!ModelState.IsValid)
             {
-                return BadRequest("Ticket data cannot be null.");
+                return BadRequest(ModelState);
             }
-            var response = await _ticketService.CreateTicketAsync(ticket);
+            var response = await _ticketService.CreateTicketsAsync(tickets);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
             }
-            return CreatedAtAction(nameof(GetTicket), new { id = response.Data?.Id }, response.Data);
+            return CreatedAtAction(nameof(CreateTickets), new { success = response.Success }, response.Data);
         }
 
 

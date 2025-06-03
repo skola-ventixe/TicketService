@@ -109,35 +109,70 @@ public class TicketService : ITicketService
         }
     }
 
-    public async Task<ServiceResponse<Ticket?>> CreateTicketAsync(TicketRegistrationDto ticket)
+    public async Task<ServiceResponse<int>> GetTicketsSoldAsync(string eventId)
     {
-        if (ticket == null)
-            return new ServiceResponse<Ticket?>
+        if (string.IsNullOrEmpty(eventId))
+            return new ServiceResponse<int>
+            {
+                Success = false,
+                Message = "Event ID cannot be null or empty."
+            };
+        try
+        {
+            var ticketsSold = await _tickets
+                .CountAsync(t => t.EventId == eventId);
+            return new ServiceResponse<int>
+            {
+                Success = true,
+                Data = ticketsSold
+            };
+        }
+        catch (Exception ex)
+        {
+            return new ServiceResponse<int>
+            {
+                Success = false,
+                Message = "An error occurred while counting the tickets sold.",
+                Error = ex.Message
+            };
+        }
+    }
+
+    public async Task<ServiceResponse<List<Ticket?>>> CreateTicketsAsync(TicketRegistrationDto tickets)
+    {
+        if (tickets == null)
+            return new ServiceResponse<List<Ticket?>>
             {
                 Success = false,
                 Message = "Ticket registration data cannot be null."
             };
         try
         {
-            var entity = new Ticket
+            List<Ticket> createdTickets = [];
+
+            foreach(var name in tickets.Names)
             {
-                PackageId = ticket.PackageId,
-                UserId = ticket.UserId,
-                Name = ticket.Name
-            };
-            _tickets.Add(entity);
+                var entity = new Ticket
+                {
+                    PackageId = tickets.PackageId,
+                    UserId = tickets.UserId,
+                    Name = name
+                };
+                _tickets.Add(entity);
+                createdTickets.Add(entity);
+            }
             await _context.SaveChangesAsync();
-            return new ServiceResponse<Ticket?>
+            return new ServiceResponse<List<Ticket?>>
             {
                 Success = true,
                 Message = "Ticket created successfully.",
-                Data = entity
+                Data = createdTickets!
             };
 
         }
         catch (Exception ex)
         {
-            return new ServiceResponse<Ticket?>
+            return new ServiceResponse<List<Ticket?>>
             {
                 Success = false,
                 Message = "An error occurred while creating the ticket.",
