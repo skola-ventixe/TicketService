@@ -2,8 +2,12 @@ using Azure.Messaging.ServiceBus;
 using Microsoft.EntityFrameworkCore;
 using Presentation.Data;
 using Presentation.Services;
+using Azure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var keyVaultEndpoint = new Uri(Environment.GetEnvironmentVariable("VaultUri")!);
+builder.Configuration.AddAzureKeyVault(keyVaultEndpoint, new DefaultAzureCredential());
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
@@ -17,7 +21,7 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddDbContext<TicketDataContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetValue<string>("SqlServer")));
 
 builder.Services.AddScoped<ITicketService, TicketService>();
 
